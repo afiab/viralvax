@@ -46,6 +46,12 @@ function create() {
         fill: '#fff'
     });
 
+    // Create a text object to display earning messages
+    this.earningsText = this.add.text(820, 550, '', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+
     // Create draggable Vaccine Center and Hospital icons in the sidebar
     const vaccineCenterIcon = this.add.image(890, 100, 'vaccineCenter').setInteractive();
     vaccineCenterIcon.setDisplaySize(120, 170);
@@ -57,7 +63,13 @@ function create() {
         }
     });
 
-    const hospitalIcon = this.add.image(890, 250, 'hospital').setInteractive();
+    // Add text below the Vaccine Center icon
+    this.add.text(850, 180, 'Cost: $200', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+
+    const hospitalIcon = this.add.image(890, 290, 'hospital').setInteractive();
     hospitalIcon.setDisplaySize(120, 170);
     hospitalIcon.on('pointerdown', () => {
         if (balance >= 300) {  // Price for placing a Hospital
@@ -65,6 +77,12 @@ function create() {
             this.balanceText.setText('Balance: $' + balance);
             placeHospital(this);  // Call function to place the hospital
         }
+    });
+
+    // Add text below the Hospital icon
+    this.add.text(850, 370, 'Cost: $300', {
+        fontSize: '14px',
+        fill: '#fff'
     });
 
     // Create people (child, person, elder)
@@ -81,6 +99,7 @@ function update() {
                 vaccinatePerson(person);
                 balance += 50;  // Earn money per vaccination
                 this.balanceText.setText('Balance: $' + balance);
+                this.earningsText.setText('+$50 Vaccination');
             }
         });
 
@@ -91,6 +110,7 @@ function update() {
                 curePerson(person);
                 balance += 100;  // Earn money per cure
                 this.balanceText.setText('Balance: $' + balance);
+                this.earningsText.setText('+$100 Cured');
             }
         });
 
@@ -119,9 +139,11 @@ function createPeople(scene) {
             person.setTint(0xffffff); // Healthy people have default color (white)
         }
 
+        person.setDepth(1); // Ensure people are drawn on top of the buildings
         people.push(person);
     }
 }
+
 
 // Function to infect a person
 function infectPerson(person) {
@@ -155,14 +177,17 @@ function movePerson(person) {
 // Function to place a Vaccine Center
 function placeVaccineCenter(scene) {
     const vaccineCenter = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'vaccineCenter').setDisplaySize(110, 140);
+    vaccineCenter.setDepth(0); // Set depth lower than people
     vaccineCenters.push(vaccineCenter);
 }
 
 // Function to place a Hospital
 function placeHospital(scene) {
-    const hospital = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'hospital').setDisplaySize(100, 100);
+    const hospital = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'hospital').setDisplaySize(110, 140);
+    hospital.setDepth(0); // Set depth lower than people
     hospitals.push(hospital);
 }
+
 
 // Function to vaccinate a person (change their status to 'vaccinated')
 function vaccinatePerson(person) {
