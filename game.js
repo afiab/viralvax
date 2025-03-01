@@ -28,12 +28,28 @@ function create() {
     this.add.image(400, 300, 'background').setDisplaySize(800, 600);
 
     // Create and resize images for people and locations
-    this.add.image(55, 440, 'vaccineCenter').setDisplaySize(110, 140);
-    this.add.image(200, 50, 'hospital').setDisplaySize(100, 100);
+    const vaccineCenter = this.add.image(55, 440, 'vaccineCenter').setDisplaySize(110, 140);
+    vaccineCenters.push(vaccineCenter); // Add the vaccine center to the vaccineCenters array
+
+    const hospital = this.add.image(200, 50, 'hospital').setDisplaySize(100, 100);
+    hospitals.push(hospital); // Add hospital to hospitals array
 
     createPeople(this); // Create people (child, person, elder)
+
+    // Create a text object for displaying the status counts
+    this.statusText = this.add.text(10, 10, '', {
+        fontSize: '16px',
+        fill: '#fff'
+    });
 }
 
+// Variables for people, vaccination status, and locations
+let people = [];
+let vaccineCenters = [];
+let hospitals = [];
+let infectionDuration = 5000; // Duration before a sick person dies
+
+// Create people function
 function createPeople(scene) {
     for (let i = 0; i < 50; i++) {
         const type = Math.random() > 0.5 ? 'person' : (Math.random() > 0.5 ? 'child' : 'elder');
@@ -41,20 +57,33 @@ function createPeople(scene) {
         const y = Math.random() * 600;
         const person = scene.add.image(x, y, type).setDisplaySize(30, 35); // Resize to 40x40
         person.setInteractive();
-        person.contaminationStatus = Math.random() > 0.5 ? 'infected' : 'healthy';
-        person.infectionTime = 0; // Track how long a person has been infected
+        
+        // Set contamination status to healthy initially (no one is vaccinated yet)
+        person.contaminationStatus = 'healthy'; // Everyone starts as healthy
+
+        // 1 in every 5 people should be infected
+        if (i % 5 === 0) {
+            person.contaminationStatus = 'infected';
+            person.setTint(0xff0000); // Infected people have red tint
+        } else {
+            person.setTint(0xffffff); // Healthy people have default color (white)
+        }
+
         people.push(person);
     }
 }
 
-// Variables for people, vaccination status, and locations
-let people = [];
-let vaccineCenters = [];
-let hospitals = [];
-let infectionDuration = 5000; // Time before person dies if infected
+// Function to infect a person
+function infectPerson(person) {
+    if (person.contaminationStatus === 'healthy') {
+        person.contaminationStatus = 'infected';
+        person.setTint(0xff0000); // Change tint to red to indicate infection
+        console.log('A person has become infected!');
+    }
+}
 
+// Function to move a person in random directions
 function movePerson(person) {
-    // Random movement for the person
     const moveDirection = Math.random();
     const speed = 1;
 
@@ -73,73 +102,49 @@ function movePerson(person) {
     person.y = Phaser.Math.Clamp(person.y, 0, 600);
 }
 
-// Function to update game logic
 function update() {
-    // Update each person's status and movement
+    // Example: Check for interactions (like people reaching vaccination centers)
     people.forEach(person => {
-        movePerson(person);
-
-        // Check for interactions with vaccine centers or hospitals
+        // Check if a person reaches the vaccine center
         vaccineCenters.forEach(center => {
-            if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 50 && person.contaminationStatus === 'healthy') {
+            if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
                 // "Vaccinate" the person
                 vaccinatePerson(person);
             }
         });
 
+        // Check if a person reaches the hospital
         hospitals.forEach(hospital => {
-            if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 50 && person.contaminationStatus === 'infected') {
+            if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
                 // "Cure" the person
                 curePerson(person);
             }
         });
 
-        // Handle infection spread (check for contact with infected people)
-        if (person.contaminationStatus === 'healthy') {
-            people.forEach(otherPerson => {
-                if (otherPerson !== person && otherPerson.contaminationStatus === 'infected' &&
-                    Phaser.Math.Distance.Between(person.x, person.y, otherPerson.x, otherPerson.y) < 30) {
-                    // Person becomes sick after contact with an infected person
-                    person.contaminationStatus = 'sick';
-                    person.setTint(0xff0000); // Change color to red to indicate sickness
-                    console.log('Person became sick!');
+        // Check for contamination with other people
+        people.forEach(otherPerson => {
+            if (person !== otherPerson && person.contaminationStatus === 'infected') {
+                let contaminationDistance = person.type === 'child' || person.type === 'elder' ? 80 : 50;
+                if (Phaser.Math.Distance.Between(person.x, person.y, otherPerson.x, otherPerson.y) < contaminationDistance && otherPerson.contaminationStatus === 'healthy') {
+                    infectPerson(otherPerson); // Infect the healthy person
                 }
-            });
-        }
-
-        // If the person is sick, count down the infection time
-        if (person.contaminationStatus === 'sick') {
-            person.infectionTime++;
-            if (person.infectionTime > infectionDuration) {
-                // Person dies after being sick for too long
-                person.contaminationStatus = 'dead';
-                person.setTint(0x000000); // Change color to black to indicate death
-                console.log('Person died from infection!');
             }
-        }
+        });
+
+        // Move the person
+        movePerson(person);
     });
 }
 
 // Function to vaccinate a person (change their status to 'vaccinated')
 function vaccinatePerson(person) {
     person.contaminationStatus = 'vaccinated';
-    person.setTint(0x0000ff);  // Change color to blue to indicate vaccinated status
+    person.setTint(0x00ff00);  // Change color to green to indicate vaccinated status
     console.log('Person vaccinated!');
-    // Emit particle effect (vaccination particles)
-    particles.createEmitter({
-        x: person.x,
-        y: person.y,
-        speed: 100,
-        lifespan: 500,
-        quantity: 10,
-        scale: { start: 0.5, end: 0 },
-    });
 }
 
 // Function to cure a person (change their status to 'healthy')
 function curePerson(person) {
     person.contaminationStatus = 'healthy';
-    person.setTint(0x00ff00);  // Change color back to green (healthy)
-    person.infectionTime = 0; // Reset infection time
-    console.log('Person cured!');
+    person.setTint(0xffffff);  // Change color back to default (healthy people have no tint)
 }
