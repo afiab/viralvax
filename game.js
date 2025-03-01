@@ -89,6 +89,19 @@ function create() {
     createPeople(this);
 }
 
+function checkContamination(person1, person2) {
+    // If the person1 is infected and person2 is healthy
+    if (person1.contaminationStatus === 'infected' && person2.contaminationStatus === 'healthy') {
+        const distance = Phaser.Math.Distance.Between(person1.x, person1.y, person2.x, person2.y);
+        
+        // If the two people are close enough (e.g., less than 50 pixels apart)
+        if (distance < 50) {
+            infectPerson(person2);  // Infect the healthy person
+            console.log('A person has become infected by another person!');
+        }
+    }
+}
+
 function update() {
     // Example: Check for interactions (like people reaching vaccination centers)
     people.forEach(person => {
@@ -111,6 +124,13 @@ function update() {
                 balance += 100;  // Earn money per cure
                 this.balanceText.setText('Balance: $' + balance);
                 this.earningsText.setText('+$100 Cured');
+            }
+        });
+
+        // Check for contamination (interaction between infected and healthy people)
+        people.forEach(otherPerson => {
+            if (person !== otherPerson) {  // Avoid checking a person against themselves
+                checkContamination(person, otherPerson);
             }
         });
 
