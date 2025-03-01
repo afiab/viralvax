@@ -154,24 +154,50 @@ function infectPerson(person) {
     }
 }
 
-// Function to move a person in random directions
+// Function to move a person with direction changing after 4-6 seconds
 function movePerson(person) {
-    const moveDirection = Math.random();
-    const speed = 1;
+    // If the person hasn't started moving or has finished their previous movement cycle
+    if (!person.direction || person.elapsedTime >= person.moveDuration) {
+        // Choose a new direction and reset the movement time
+        const moveDirection = Math.random();
+        person.elapsedTime = 0;  // Reset elapsed time
+        
+        // Randomly assign a direction and movement duration (4-6 seconds)
+        person.moveDuration = Phaser.Math.Between(1,3);  // Random duration between 4 and 6 seconds
+        
+        // Prevent movement direction from being toward the edge if person is close
+        if (moveDirection < 0.25 && person.x < 780) {
+            person.direction = 'right';  // Move right
+        } else if (moveDirection < 0.5 && person.x > 0) {
+            person.direction = 'left';   // Move left
+        } else if (moveDirection < 0.75 && person.y < 600) {
+            person.direction = 'down';   // Move down
+        } else {
+            person.direction = 'up';     // Move up
+        }
+    }
 
-    if (moveDirection < 0.25) {
-        person.x += speed;  // Move right
-    } else if (moveDirection < 0.5) {
-        person.x -= speed;  // Move left
-    } else if (moveDirection < 0.75) {
-        person.y += speed;  // Move down
-    } else {
-        person.y -= speed;  // Move up
+    // Define the total distance to move (500 pixels over 4-6 seconds)
+    const distancePerSecond = 200 / person.moveDuration;  // Move 500px in 4-6 seconds
+    const distanceThisFrame = distancePerSecond * (game.loop.delta / 1000);  // Scale by delta time
+
+    // Move the person in the current direction
+    if (person.direction === 'right') {
+        person.x += distanceThisFrame;  // Move right
+    } else if (person.direction === 'left') {
+        person.x -= distanceThisFrame;  // Move left
+    } else if (person.direction === 'down') {
+        person.y += distanceThisFrame;  // Move down
+    } else if (person.direction === 'up') {
+        person.y -= distanceThisFrame;  // Move up
     }
 
     // Keep people within bounds of the screen
-    person.x = Phaser.Math.Clamp(person.x, 0, 800);
+    person.x = Phaser.Math.Clamp(person.x, 0, 785);
     person.y = Phaser.Math.Clamp(person.y, 0, 600);
+
+    // Update the elapsed time
+    person.elapsedTime += game.loop.delta / 1000;
 }
 
 // Function to place a Vaccine Center
