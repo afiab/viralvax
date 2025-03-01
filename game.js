@@ -41,14 +41,14 @@ function create() {
     });
 
     // Create and display the balance in the sidebar
-    this.balanceText = this.add.text(810, 10, 'Balance: $' + balance, {
+    this.balanceText = this.add.text(820, 10, 'Balance: $' + balance, {
         fontSize: '18px',
         fill: '#fff'
     });
 
     // Create draggable Vaccine Center and Hospital icons in the sidebar
-    const vaccineCenterIcon = this.add.image(810, 100, 'vaccineCenter').setInteractive();
-    vaccineCenterIcon.setDisplaySize(50, 70);
+    const vaccineCenterIcon = this.add.image(890, 100, 'vaccineCenter').setInteractive();
+    vaccineCenterIcon.setDisplaySize(120, 170);
     vaccineCenterIcon.on('pointerdown', () => {
         if (balance >= 200) {  // Price for placing a Vaccine Center
             balance -= 200;
@@ -57,8 +57,8 @@ function create() {
         }
     });
 
-    const hospitalIcon = this.add.image(810, 200, 'hospital').setInteractive();
-    hospitalIcon.setDisplaySize(50, 70);
+    const hospitalIcon = this.add.image(890, 250, 'hospital').setInteractive();
+    hospitalIcon.setDisplaySize(120, 170);
     hospitalIcon.on('pointerdown', () => {
         if (balance >= 300) {  // Price for placing a Hospital
             balance -= 300;
