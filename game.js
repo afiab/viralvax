@@ -110,9 +110,9 @@ function update() {
             if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
                 // "Vaccinate" the person
                 vaccinatePerson(person);
-                balance += 50;  // Earn money per vaccination
+                balance += 20;  // Earn money per vaccination
                 this.balanceText.setText('Balance: $' + balance);
-                this.earningsText.setText('+$50 Vaccination');
+                this.earningsText.setText('+$20 Vaccination');
             }
         });
 
@@ -121,9 +121,9 @@ function update() {
             if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
                 // "Cure" the person
                 curePerson(person);
-                balance += 100;  // Earn money per cure
+                balance += 50;  // Earn money per cure
                 this.balanceText.setText('Balance: $' + balance);
-                this.earningsText.setText('+$100 Cured');
+                this.earningsText.setText('+$50 Cured');
             }
         });
 
