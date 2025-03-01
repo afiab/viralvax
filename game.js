@@ -220,16 +220,20 @@ function movePerson(person) {
     person.elapsedTime += game.loop.delta / 1000;
 }
 
-// Function to place a Vaccine Center
+// Function to place a Vaccine Center on a 50px grid
 function placeVaccineCenter(scene) {
-    const vaccineCenter = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'vaccineCenter').setDisplaySize(110, 140);
+    const x = Math.floor((Math.random() * 810) / 50) * 50;  // Snap to nearest 50px grid
+    const y = Math.floor((Math.random() * 600) / 50) * 50;  // Snap to nearest 50px grid
+    const vaccineCenter = scene.add.image(x, y, 'vaccineCenter').setDisplaySize(110, 140);
     vaccineCenter.setDepth(0); // Set depth lower than people
     vaccineCenters.push(vaccineCenter);
 }
 
-// Function to place a Hospital
+// Function to place a Hospital on a 50px grid
 function placeHospital(scene) {
-    const hospital = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'hospital').setDisplaySize(110, 140);
+    const x = Math.floor((Math.random() * 810) / 50) * 50;  // Snap to nearest 50px grid
+    const y = Math.floor((Math.random() * 600) / 50) * 50;  // Snap to nearest 50px grid
+    const hospital = scene.add.image(x, y, 'hospital').setDisplaySize(110, 140);
     hospital.setDepth(0); // Set depth lower than people
     hospitals.push(hospital);
 }
