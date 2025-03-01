@@ -1,7 +1,7 @@
 // Game configuration
 const config = {
     type: Phaser.AUTO,
-    width: 800,
+    width: 1000, // Increased width for sidebar
     height: 600,
     scene: {
         preload: preload,
@@ -12,6 +12,13 @@ const config = {
 
 // Create the Phaser game
 const game = new Phaser.Game(config);
+
+// Variables for people, vaccination status, and locations
+let people = [];
+let vaccineCenters = [];
+let hospitals = [];
+let balance = 1000; // Player's starting balance
+let infectionDuration = 5000; // Duration before a sick person dies
 
 function preload() {
     this.load.image('background', './assets/background.png');
@@ -27,29 +34,72 @@ function create() {
     // Resize background to fit the entire screen
     this.add.image(400, 300, 'background').setDisplaySize(800, 600);
 
-    // Create and resize images for people and locations
-    const vaccineCenter = this.add.image(55, 440, 'vaccineCenter').setDisplaySize(110, 140);
-    vaccineCenters.push(vaccineCenter); // Add the vaccine center to the vaccineCenters array
-
-    const hospital = this.add.image(200, 50, 'hospital').setDisplaySize(100, 100);
-    hospitals.push(hospital); // Add hospital to hospitals array
-
-    createPeople(this); // Create people (child, person, elder)
-
     // Create a text object for displaying the status counts
     this.statusText = this.add.text(10, 10, '', {
         fontSize: '16px',
         fill: '#fff'
     });
+
+    // Create and display the balance in the sidebar
+    this.balanceText = this.add.text(810, 10, 'Balance: $' + balance, {
+        fontSize: '18px',
+        fill: '#fff'
+    });
+
+    // Create draggable Vaccine Center and Hospital icons in the sidebar
+    const vaccineCenterIcon = this.add.image(810, 100, 'vaccineCenter').setInteractive();
+    vaccineCenterIcon.setDisplaySize(50, 70);
+    vaccineCenterIcon.on('pointerdown', () => {
+        if (balance >= 200) {  // Price for placing a Vaccine Center
+            balance -= 200;
+            this.balanceText.setText('Balance: $' + balance);
+            placeVaccineCenter(this);  // Call function to place the vaccine center
+        }
+    });
+
+    const hospitalIcon = this.add.image(810, 200, 'hospital').setInteractive();
+    hospitalIcon.setDisplaySize(50, 70);
+    hospitalIcon.on('pointerdown', () => {
+        if (balance >= 300) {  // Price for placing a Hospital
+            balance -= 300;
+            this.balanceText.setText('Balance: $' + balance);
+            placeHospital(this);  // Call function to place the hospital
+        }
+    });
+
+    // Create people (child, person, elder)
+    createPeople(this);
 }
 
-// Variables for people, vaccination status, and locations
-let people = [];
-let vaccineCenters = [];
-let hospitals = [];
-let infectionDuration = 5000; // Duration before a sick person dies
+function update() {
+    // Example: Check for interactions (like people reaching vaccination centers)
+    people.forEach(person => {
+        // Check if a person reaches the vaccine center
+        vaccineCenters.forEach(center => {
+            if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
+                // "Vaccinate" the person
+                vaccinatePerson(person);
+                balance += 50;  // Earn money per vaccination
+                this.balanceText.setText('Balance: $' + balance);
+            }
+        });
 
-// Create people function
+        // Check if a person reaches the hospital
+        hospitals.forEach(hospital => {
+            if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
+                // "Cure" the person
+                curePerson(person);
+                balance += 100;  // Earn money per cure
+                this.balanceText.setText('Balance: $' + balance);
+            }
+        });
+
+        // Move the person
+        movePerson(person);
+    });
+}
+
+// Function to create people (child, person, elder)
 function createPeople(scene) {
     for (let i = 0; i < 50; i++) {
         const type = Math.random() > 0.5 ? 'person' : (Math.random() > 0.5 ? 'child' : 'elder');
@@ -57,7 +107,7 @@ function createPeople(scene) {
         const y = Math.random() * 600;
         const person = scene.add.image(x, y, type).setDisplaySize(30, 35); // Resize to 40x40
         person.setInteractive();
-        
+
         // Set contamination status to healthy initially (no one is vaccinated yet)
         person.contaminationStatus = 'healthy'; // Everyone starts as healthy
 
@@ -102,38 +152,16 @@ function movePerson(person) {
     person.y = Phaser.Math.Clamp(person.y, 0, 600);
 }
 
-function update() {
-    // Example: Check for interactions (like people reaching vaccination centers)
-    people.forEach(person => {
-        // Check if a person reaches the vaccine center
-        vaccineCenters.forEach(center => {
-            if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
-                // "Vaccinate" the person
-                vaccinatePerson(person);
-            }
-        });
+// Function to place a Vaccine Center
+function placeVaccineCenter(scene) {
+    const vaccineCenter = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'vaccineCenter').setDisplaySize(110, 140);
+    vaccineCenters.push(vaccineCenter);
+}
 
-        // Check if a person reaches the hospital
-        hospitals.forEach(hospital => {
-            if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
-                // "Cure" the person
-                curePerson(person);
-            }
-        });
-
-        // Check for contamination with other people
-        people.forEach(otherPerson => {
-            if (person !== otherPerson && person.contaminationStatus === 'infected') {
-                let contaminationDistance = person.type === 'child' || person.type === 'elder' ? 80 : 50;
-                if (Phaser.Math.Distance.Between(person.x, person.y, otherPerson.x, otherPerson.y) < contaminationDistance && otherPerson.contaminationStatus === 'healthy') {
-                    infectPerson(otherPerson); // Infect the healthy person
-                }
-            }
-        });
-
-        // Move the person
-        movePerson(person);
-    });
+// Function to place a Hospital
+function placeHospital(scene) {
+    const hospital = scene.add.image(200 + Math.random() * 600, 100 + Math.random() * 400, 'hospital').setDisplaySize(100, 100);
+    hospitals.push(hospital);
 }
 
 // Function to vaccinate a person (change their status to 'vaccinated')
