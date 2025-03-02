@@ -56,31 +56,47 @@ function create() {
     const vaccineCenterIcon = this.add.image(890, 100, 'vaccineCenter').setInteractive();
     vaccineCenterIcon.setDisplaySize(120, 170);
     vaccineCenterIcon.on('pointerdown', () => {
-        if (balance >= 200) {  // Price for placing a Vaccine Center
-            balance -= 200;
+        if (balance >= 300) {  // Price for placing a Vaccine Center
+            balance -= 300;
             this.balanceText.setText('Balance: $' + balance);
             placeVaccineCenter(this);  // Call function to place the vaccine center
         }
     });
 
     // Add text below the Vaccine Center icon
-    this.add.text(850, 180, 'Cost: $200', {
+    this.add.text(835, 180, 'Vaccine Center', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+    this.add.text(850, 200, 'Cost: $300', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+    this.add.text(830, 220, 'Per Vaccine: $5', {
         fontSize: '14px',
         fill: '#fff'
     });
 
-    const hospitalIcon = this.add.image(890, 290, 'hospital').setInteractive();
+    const hospitalIcon = this.add.image(890, 320, 'hospital').setInteractive();
     hospitalIcon.setDisplaySize(120, 170);
     hospitalIcon.on('pointerdown', () => {
-        if (balance >= 300) {  // Price for placing a Hospital
-            balance -= 300;
+        if (balance >= 700) {  // Price for placing a Hospital
+            balance -= 700;
             this.balanceText.setText('Balance: $' + balance);
             placeHospital(this);  // Call function to place the hospital
         }
     });
 
     // Add text below the Hospital icon
-    this.add.text(850, 370, 'Cost: $300', {
+    this.add.text(860, 400, 'Hospital', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+    this.add.text(850, 420, 'Cost: $700', {
+        fontSize: '14px',
+        fill: '#fff'
+    });
+    this.add.text(820, 440, 'Cured Patient: +$10', {
         fontSize: '14px',
         fill: '#fff'
     });
@@ -110,9 +126,9 @@ function update() {
             if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
                 // "Vaccinate" the person
                 vaccinatePerson(person);
-                balance += 20;  // Earn money per vaccination
+                balance += 5;  // Earn money per vaccination
                 this.balanceText.setText('Balance: $' + balance);
-                this.earningsText.setText('+$20 Vaccination');
+                this.earningsText.setText('+$5 Vaccination');
             }
         });
 
@@ -121,9 +137,9 @@ function update() {
             if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
                 // "Cure" the person
                 curePerson(person);
-                balance += 50;  // Earn money per cure
+                balance += 10;  // Earn money per cure
                 this.balanceText.setText('Balance: $' + balance);
-                this.earningsText.setText('+$50 Cured');
+                this.earningsText.setText('+$10 Cured');
             }
         });
 
@@ -152,7 +168,7 @@ function createPeople(scene) {
         person.contaminationStatus = 'healthy'; // Everyone starts as healthy
 
         // 1 in every 5 people should be infected
-        if (i % 5 === 0) {
+        if (i % 10 === 0) {
             person.contaminationStatus = 'infected';
             person.setTint(0xff0000); // Infected people have red tint
         } else {
@@ -198,7 +214,7 @@ function movePerson(person) {
     }
 
     // Define the total distance to move (500 pixels over 4-6 seconds)
-    const distancePerSecond = 200 / person.moveDuration;  // Move 500px in 4-6 seconds
+    const distancePerSecond = 150 / person.moveDuration;  // Move 500px in 4-6 seconds
     const distanceThisFrame = distancePerSecond * (game.loop.delta / 1000);  // Scale by delta time
 
     // Move the person in the current direction
@@ -222,8 +238,8 @@ function movePerson(person) {
 
 // Function to place a Vaccine Center on a 50px grid
 function placeVaccineCenter(scene) {
-    const x = Math.floor((Math.random() * 810) / 50) * 50;  // Snap to nearest 50px grid
-    const y = Math.floor((Math.random() * 600) / 50) * 50;  // Snap to nearest 50px grid
+    const x = 110+Math.floor((Math.random() * 810-110) / 150) * 150;  // Snap to nearest 50px grid
+    const y = 50+Math.floor((Math.random() * 600) / 100) * 100;  // Snap to nearest 50px grid
     const vaccineCenter = scene.add.image(x, y, 'vaccineCenter').setDisplaySize(110, 140);
     vaccineCenter.setDepth(0); // Set depth lower than people
     vaccineCenters.push(vaccineCenter);
@@ -231,8 +247,8 @@ function placeVaccineCenter(scene) {
 
 // Function to place a Hospital on a 50px grid
 function placeHospital(scene) {
-    const x = Math.floor((Math.random() * 810) / 50) * 50;  // Snap to nearest 50px grid
-    const y = Math.floor((Math.random() * 600) / 50) * 50;  // Snap to nearest 50px grid
+    const x = 55+Math.floor((Math.random() * 810-110) / 150) * 150;  // Snap to nearest 50px grid
+    const y = 25+Math.floor((Math.random() * 600) / 100) * 100;  // Snap to nearest 50px grid
     const hospital = scene.add.image(x, y, 'hospital').setDisplaySize(110, 140);
     hospital.setDepth(0); // Set depth lower than people
     hospitals.push(hospital);
