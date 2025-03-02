@@ -113,7 +113,7 @@ function checkContamination(person1, person2) {
         // If the two people are close enough (e.g., less than 50 pixels apart)
         if (distance < 50) {
             infectPerson(person2);  // Infect the healthy person
-            console.log('A person has become infected by another person!');
+            // console.log('A person has become infected by another person!');
         }
     }
 }
@@ -186,7 +186,7 @@ function infectPerson(person) {
     if (person.contaminationStatus === 'healthy') {
         person.contaminationStatus = 'infected';
         person.setTint(0xff0000); // Change tint to red to indicate infection
-        console.log('A person has become infected!');
+        // console.log('A person has become infected!');
     }
 }
 
@@ -236,30 +236,49 @@ function movePerson(person) {
     person.elapsedTime += game.loop.delta / 1000;
 }
 
-// Function to place a Vaccine Center on a 50px grid
+const maxVaccineCenters = 5; // Limit for vaccine centers
+const maxHospitals = 5; // Limit for hospitals
+const occupiedPositions = new Set(); // Store occupied positions
+
+// Function to generate a valid random position
+function getValidPosition() {
+    let x, y, key;
+    do {
+        x = Math.floor(Math.random() * (800 - 110) / 50) * 50 + 50; // Keep within 0-800
+        y = Math.floor(Math.random() * (600 - 140) / 50) * 50 + 50; // Keep within 0-600
+        key = `${x},${y}`;
+    } while (occupiedPositions.has(key)); // Ensure no overlap
+    occupiedPositions.add(key);
+    return { x, y };
+}
+
+// Function to place a Vaccine Center
 function placeVaccineCenter(scene) {
-    const x = 110+Math.floor((Math.random() * 810-110) / 150) * 150;  // Snap to nearest 50px grid
-    const y = 50+Math.floor((Math.random() * 600) / 100) * 100;  // Snap to nearest 50px grid
+    if (vaccineCenters.length >= maxVaccineCenters) return; // Limit check
+    const { x, y } = getValidPosition();
     const vaccineCenter = scene.add.image(x, y, 'vaccineCenter').setDisplaySize(110, 140);
-    vaccineCenter.setDepth(0); // Set depth lower than people
+    vaccineCenter.setDepth(0); 
+    console.log(`Vaccine Center placed at (${x}, ${y})`);
     vaccineCenters.push(vaccineCenter);
 }
 
-// Function to place a Hospital on a 50px grid
+// Function to place a Hospital
 function placeHospital(scene) {
-    const x = 55+Math.floor((Math.random() * 810-110) / 150) * 150;  // Snap to nearest 50px grid
-    const y = 25+Math.floor((Math.random() * 600) / 100) * 100;  // Snap to nearest 50px grid
+    if (hospitals.length >= maxHospitals) return; // Limit check
+    const { x, y } = getValidPosition();
     const hospital = scene.add.image(x, y, 'hospital').setDisplaySize(110, 140);
-    hospital.setDepth(0); // Set depth lower than people
+    hospital.setDepth(0); 
+    console.log(`Hospital placed at (${x}, ${y})`);
     hospitals.push(hospital);
 }
+
 
 
 // Function to vaccinate a person (change their status to 'vaccinated')
 function vaccinatePerson(person) {
     person.contaminationStatus = 'vaccinated';
     person.setTint(0x00ff00);  // Change color to green to indicate vaccinated status
-    console.log('Person vaccinated!');
+    // console.log('Person vaccinated!');
 }
 
 // Function to cure a person (change their status to 'healthy')
