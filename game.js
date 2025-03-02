@@ -298,8 +298,8 @@ function movePerson(person) {
 function getValidPosition() {
     let x, y, key;
     do {
-        x = Math.floor(Math.random() * (800 - 110) / 50) * 50 + 50; // Keep within 0-800
-        y = Math.floor(Math.random() * (600 - 140) / 50) * 50 + 50; // Keep within 0-600
+        x = Math.floor(Math.random() * (800 - 110) / 150) * 150 + 50; // Keep within 0-800
+        y = Math.floor(Math.random() * (600 - 140) / 150) * 150 + 50; // Keep within 0-600
         key = `${x},${y}`;
     } while (occupiedPositions.has(key)); // Ensure no overlap
     occupiedPositions.add(key);
