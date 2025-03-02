@@ -94,7 +94,7 @@ class MainScene extends Phaser.Scene {
             fontSize: '14px',
             fill: '#fff'
         });
-        this.add.text(830, 220, 'Per Vaccine: $5', {
+        this.add.text(830, 220, 'Per Vaccine: +$2', {
             fontSize: '14px',
             fill: '#fff'
         });
@@ -118,7 +118,7 @@ class MainScene extends Phaser.Scene {
             fontSize: '14px',
             fill: '#fff'
         });
-        this.add.text(820, 440, 'Cured Patient: +$10', {
+        this.add.text(820, 440, 'Cured Patient: +$5', {
             fontSize: '14px',
             fill: '#fff'
         });
@@ -133,18 +133,18 @@ class MainScene extends Phaser.Scene {
             vaccineCenters.forEach(center => {
                 if (Phaser.Math.Distance.Between(person.x, person.y, center.x, center.y) < 60 && person.contaminationStatus === 'healthy') {
                     vaccinatePerson(person);
-                    balance += 5;
+                    balance += 2;
                     this.balanceText.setText('Balance: $' + balance);
-                    this.earningsText.setText('+$5 Vaccination');
+                    this.earningsText.setText('+$2 Vaccination');
                 }
             });
 
             hospitals.forEach(hospital => {
                 if (Phaser.Math.Distance.Between(person.x, person.y, hospital.x, hospital.y) < 60 && person.contaminationStatus === 'infected') {
                     curePerson(person);
-                    balance += 10;
+                    balance += 5;
                     this.balanceText.setText('Balance: $' + balance);
-                    this.earningsText.setText('+$10 Cured');
+                    this.earningsText.setText('+$5 Cured');
                 }
             });
 
