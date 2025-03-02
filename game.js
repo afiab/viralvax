@@ -299,7 +299,7 @@ function getValidPosition() {
     let x, y, key;
     do {
         x = Math.floor(Math.random() * (800 - 110) / 150) * 150 + 50; // Keep within 0-800
-        y = Math.floor(Math.random() * (600 - 140) / 150) * 150 + 50; // Keep within 0-600
+        y = Math.floor(Math.random() * (600 - 140) / 150) * 150 + 100; // Keep within 0-600
         key = `${x},${y}`;
     } while (occupiedPositions.has(key)); // Ensure no overlap
     occupiedPositions.add(key);
