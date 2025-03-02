@@ -8,6 +8,7 @@ class StartScene extends Phaser.Scene {
         // Load assets for the start screen
         this.load.image('background', './assets/background.png'); // Same background as MainScene
         this.load.image('startButton', './assets/startButton.png'); // Load the start button image
+        this.load.image('restartButton', './assets/restartButton.png'); // Load the restart button image
     }
 
     create() {
@@ -23,26 +24,9 @@ class StartScene extends Phaser.Scene {
             strokeThickness: 10
         }).setOrigin(0.5);
 
-        // // Add instructions text
-        // this.add.text(400, 300, 'Manage the spread of the epidemic by building vaccine centers and hospitals.\nClick the button below to start the game.', {
-        //     fontSize: '18px',
-        //     fill: '#fff',
-        //     fontFamily: 'Arial',
-        //     align: 'center',
-        //     stroke: '#000',
-        //     strokeThickness: 2
-        // }).setOrigin(0.5);
-
         // Add start button
         const startButton = this.add.image(400, 350, 'startButton').setInteractive();
         startButton.setDisplaySize(200, 150);
-
-        // Add text on the button
-        // this.add.text(400, 400, 'Start Game', {
-        //     fontSize: '24px',
-        //     fill: '#000',
-        //     fontFamily: 'Arial'
-        // }).setOrigin(0.5);
 
         // Add event listener to the button
         startButton.on('pointerdown', () => {
@@ -178,6 +162,54 @@ class MainScene extends Phaser.Scene {
         // Update the sidebar text to show the current count of added Vaccine Centers and Hospitals
         this.vaccineCenterText.setText(`Vaccine Center (${vaccineCenters.length}/${maxVaccineCenters})`);
         this.hospitalText.setText(`Hospital (${hospitals.length}/${maxHospitals})`);
+
+        // Check for game-ending conditions
+        checkGameEnd(this);
+    }
+}
+
+// Define EndScene class
+class EndScene extends Phaser.Scene {
+    constructor() {
+        super({ key: 'EndScene' });
+    }
+
+    create(data) {
+        // Add background image
+        this.add.image(400, 300, 'background').setDisplaySize(800, 600);
+
+        // Display the ending message
+        this.add.text(400, 200, data.message, {
+            fontSize: '48px',
+            fill: '#fff',
+            fontFamily: 'Arial',
+            stroke: '#000',
+            strokeThickness: 4
+        }).setOrigin(0.5);
+
+        // Add restart button
+        const restartButton = this.add.image(400, 350, 'restartButton').setInteractive();
+        restartButton.setDisplaySize(200, 150);
+
+        // Add text on the button
+        // this.add.text(400, 350, 'Restart', {
+        //     fontSize: '24px',
+        //     fill: '#000',
+        //     fontFamily: 'Arial'
+        // }).setOrigin(0.5);
+
+        // Add event listener to the button
+        restartButton.on('pointerdown', () => {
+            // Reset game variables
+            people = [];
+            vaccineCenters = [];
+            hospitals = [];
+            balance = 1000;
+            occupiedPositions.clear();
+
+            // Restart the game
+            this.scene.start('StartScene');
+        });
     }
 }
 
@@ -314,12 +346,35 @@ function checkContamination(person1, person2) {
     }
 }
 
+// Function to check for game-ending conditions
+function checkGameEnd(scene) {
+    let vaccinatedCount = 0;
+    let infectedCount = 0;
+
+    people.forEach(person => {
+        if (person.contaminationStatus === 'vaccinated') {
+            vaccinatedCount++;
+        } else if (person.contaminationStatus === 'infected') {
+            infectedCount++;
+        }
+    });
+
+    // Check for ending conditions
+    if (infectedCount === 0) {
+        scene.scene.start('EndScene', { message: 'Cured Victory!' });
+    } else if (balance >= 100000) {
+        scene.scene.start('EndScene', { message: 'Millionaire!' });
+    } else if (infectedCount === people.length) {
+        scene.scene.start('EndScene', { message: 'Failure: All Sick!' });
+    }
+}
+
 // Game configuration
 const config = {
     type: Phaser.AUTO,
     width: 1000, // Increased width for sidebar
     height: 600,
-    scene: [StartScene, MainScene] // Include both scenes
+    scene: [StartScene, MainScene, EndScene] // Include all scenes
 };
 
 // Create the Phaser game
