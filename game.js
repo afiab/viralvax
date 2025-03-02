@@ -56,15 +56,15 @@ function create() {
     const vaccineCenterIcon = this.add.image(890, 100, 'vaccineCenter').setInteractive();
     vaccineCenterIcon.setDisplaySize(120, 170);
     vaccineCenterIcon.on('pointerdown', () => {
-        if (balance >= 300) {  // Price for placing a Vaccine Center
+        if (balance >= 300 && vaccineCenters.length < maxVaccineCenters) {  // Price for placing a Vaccine Center
             balance -= 300;
             this.balanceText.setText('Balance: $' + balance);
             placeVaccineCenter(this);  // Call function to place the vaccine center
         }
     });
 
-    // Add text below the Vaccine Center icon
-    this.add.text(835, 180, 'Vaccine Center', {
+    // Add text below the Vaccine Center icon with dynamic count
+    this.vaccineCenterText = this.add.text(820, 180, `Vaccine Center (0/${maxVaccineCenters})`, {
         fontSize: '14px',
         fill: '#fff'
     });
@@ -80,15 +80,15 @@ function create() {
     const hospitalIcon = this.add.image(890, 320, 'hospital').setInteractive();
     hospitalIcon.setDisplaySize(120, 170);
     hospitalIcon.on('pointerdown', () => {
-        if (balance >= 700) {  // Price for placing a Hospital
+        if (balance >= 700 && hospitals.length < maxHospitals) {  // Price for placing a Hospital
             balance -= 700;
             this.balanceText.setText('Balance: $' + balance);
             placeHospital(this);  // Call function to place the hospital
         }
     });
 
-    // Add text below the Hospital icon
-    this.add.text(860, 400, 'Hospital', {
+    // Add text below the Hospital icon with dynamic count
+    this.hospitalText = this.add.text(840, 400, `Hospital (0/${maxHospitals})`, {
         fontSize: '14px',
         fill: '#fff'
     });
@@ -153,6 +153,10 @@ function update() {
         // Move the person
         movePerson(person);
     });
+
+    // Update the sidebar text to show the current count of added Vaccine Centers and Hospitals
+    this.vaccineCenterText.setText(`Vaccine Center (${vaccineCenters.length}/${maxVaccineCenters})`);
+    this.hospitalText.setText(`Hospital (${hospitals.length}/${maxHospitals})`);
 }
 
 // Function to create people (child, person, elder)
